@@ -13,7 +13,7 @@ from DATT.configuration.configuration import AllConfig
 from DATT.refs import TrajectoryRef
 
 from DATT.python_utils.plotu import subplot, set_3daxes_equal
-
+from DATT.controllers.hybrid_controller import HybridController
 
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -59,8 +59,14 @@ if __name__ == "__main__":
 
     # Loading controller
     cntrl : ControllersZoo = args.cntrl
-    cntrl_config = getattr(cntrl_config_presets, args.cntrl_config, "Config not found")
-    controller = cntrl.cntrl(config, {cntrl._value_ : cntrl_config})
+    if cntrl == ControllersZoo.HYBRID:
+        mppi_config = getattr(cntrl_config_presets, "MPPIConfig", "Config not found")
+        datt_config = getattr(cntrl_config_presets, "DATTConfig", "Config not found")
+        # Instantiate the HybridController with both configurations
+        controller = HybridController(config, mppi_config, datt_config)
+    else:
+        cntrl_config = getattr(cntrl_config_presets, args.cntrl_config, "Config not found")
+        controller = cntrl.cntrl(config, {cntrl._value_ : cntrl_config})
     controller.ref_func = ref
 
 
